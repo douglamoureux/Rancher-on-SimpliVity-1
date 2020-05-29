@@ -53,7 +53,8 @@
 - name: Set variables specific to SVT CSI Driver
   set_fact:
     csi_controller_rbac: "svt-csi-controller-rbac.yaml"
-    csi_controller_ss: "svt-csi-controller-deployment.yaml"
+    csi_controller_ss: "svt-csi-controller-ss.yaml"
+    #csi_controller_ss: "svt-csi-controller-deployment.yaml"
     csi_controller_node_ds: "svt-csi-node-ds.yaml"
     csi_provisioner: "csi.simplivity.hpe.com"
   when: csi_driver == "svt"
@@ -128,14 +129,61 @@
     kubeconfig: "{{ uc_kube_config_file }}"
     definition: "{{ lookup('file','{{ csi_controller_node_ds }}') }}"
 
-# need to install Snapshot controller 1st
-#- name: Create SVT Snapshot Class 
+- name: Install CSI Snapshot Class CRD
+  k8s:
+    state: present
+    validate_certs: true
+    kubeconfig: "{{ uc_kube_config_file }}"
+    definition: "{{ lookup('file','snapshot.storage.k8s.io_volumesnapshotclasses.yaml') }}"
+  when: csi_driver == "svt"   ## This should work with vsphere too
+
+- name: Install CSI Snapshot Content CRD
+  k8s:
+    state: present
+    validate_certs: true
+    kubeconfig: "{{ uc_kube_config_file }}"
+    definition: "{{ lookup('file','snapshot.storage.k8s.io_volumesnapshotcontents.yaml') }}"
+  when: csi_driver == "svt"
+
+- name: Install CSI VolumeSnapshot CRD
+  k8s:
+    state: present
+    validate_certs: true
+    kubeconfig: "{{ uc_kube_config_file }}"
+    definition: "{{ lookup('file','snapshot.storage.k8s.io_volumesnapshots.yaml') }}"
+  when: csi_driver == "svt"
+
+- name: Create snapshot-controller RBAC
+  k8s:
+    state: present
+    validate_certs: true
+    kubeconfig: "{{ uc_kube_config_file }}"
+    definition: "{{ lookup('file','rbac-snapshot-controller.yaml') }}"
+  when: csi_driver == "svt"
+
+- name: Deploy snapshot-controller
+  k8s:
+    state: present
+    validate_certs: true
+    kubeconfig: "{{ uc_kube_config_file }}"
+    definition: "{{ lookup('file','setup-snapshot-controller.yaml') }}"
+  when: csi_driver == "svt"
+
+- name: Create SVT Snapshot Class 
+  k8s:
+    state: present
+    validate_certs: true
+    kubeconfig: "{{ uc_kube_config_file }}"
+    definition: "{{ lookup('file','svt-snapshot-class.yaml') }}"
+  when: csi_driver == "svt"
+
+#- name: Create VMware Snapshot Class 
 #  k8s:
 #    state: present
 #    validate_certs: true
 #    kubeconfig: "{{ uc_kube_config_file }}"
-#    definition: "{{ lookup('file','svt-snapshot-class.yaml') }}"
-#  when: csi_driver == "svt"
+#    definition: "{{ lookup('file','vsphere-snapshot-class.yaml') }}"
+#  when: csi_driver == "vsphere"
 
 - name: See if the CSI Storage Class exists
   k8s_info:
