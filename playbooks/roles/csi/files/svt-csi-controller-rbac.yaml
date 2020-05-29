@@ -3,24 +3,21 @@ apiVersion: v1
 metadata:
   name: svt-csi-controller
   namespace: kube-system
-  #namespace: svt-system
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: svt-csi-controller-role
-  namespace: kube-system
-  #namespace: svt-system
 rules:
   - apiGroups: [""]
-    resources: ["nodes", "persistentvolumeclaims", "pods"]
-    verbs: ["get", "list", "watch", "update"] # updated for running leader-election
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: [""]
-    resources: ["configmaps", "leases"] # updated for running leader-election
-    verbs: ["get", "list", "watch", "create", "update", "delete"]
-  - apiGroups: ["coordination.k8s.io"] # updated for running leader-election
-    resources: ["leases"]
-    verbs: ["get", "list", "watch", "create", "update", "delete"]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "update"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: [""]
     resources: ["persistentvolumes"]
     verbs: ["get", "list", "watch", "create", "update", "delete"]
@@ -35,21 +32,39 @@ rules:
     verbs: ["get", "list", "watch"]
   - apiGroups: ["storage.k8s.io"]
     resources: ["volumeattachments"]
-    verbs: ["get", "list", "watch", "update", "patch"] # updated for running leader-election
+    verbs: ["get", "list", "watch", "update"]
+  # below for snapshotter
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotcontents"]
+    verbs: ["create", "get", "list", "watch", "update", "delete"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotcontents/status"]
+    verbs: ["update"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshots/status"]
+    verbs: ["update"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshots"]
+    verbs: ["get", "list", "watch", "update"]
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["create", "list", "watch", "delete"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: svt-csi-controller-binding
-  namespace: kube-system
-  #namespace: svt-system
 subjects:
   - kind: ServiceAccount
     name: svt-csi-controller
     namespace: kube-system
-    #namespace: svt-system
 roleRef:
   kind: ClusterRole
   name: svt-csi-controller-role
   apiGroup: rbac.authorization.k8s.io
-
