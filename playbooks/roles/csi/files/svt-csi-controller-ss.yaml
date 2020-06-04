@@ -52,9 +52,7 @@ spec:
             - name: socket-dir
               mountPath: /csi
         - name: svt-csi-controller
-          image: docker.io/hpesimplivity/vsphere-csi-driver:v1.0-rc1
-          #image: artifactory01.hcilabs.hpecorp.net:443/svt-production/simplivity-vsphere-csi-driver/csi/ci/vsphere-csi-driver:v1.0.1-86-g85918f8
-          #image: artifactory01.hcilabs.hpecorp.net:443/users/jtaylor/docker_io_hpesimplivity_vsphere-csi-driver:v1.0.2-86-g360ec08-dirty
+          image: docker.io/hpesimplivity/vsphere-csi-driver:v1.0-rc2
           args:
             - "--v=4"
           imagePullPolicy: "Always"
@@ -94,9 +92,7 @@ spec:
             - mountPath: /csi
               name: socket-dir
         - name: vsphere-syncer
-          image: docker.io/hpesimplivity/vsphere-csi-syncer:v1.0-rc1
-          #image: artifactory01.hcilabs.hpecorp.net:443/svt-production/simplivity-vsphere-csi-driver/csi/ci/vsphere-csi-syncer:v1.0.1-86-g85918f8
-          #image: artifactory01.hcilabs.hpecorp.net:443/users/jtaylor/docker_io_hpesimplivity_vsphere-csi-syncer:v1.0.2-86-g360ec08-dirty
+          image: docker.io/hpesimplivity/vsphere-csi-syncer:v1.0-rc2
           args:
             - "--v=2"
           imagePullPolicy: "Always"
